@@ -433,17 +433,14 @@ exports.usercancelorder = async (req, res) => {
     // })
 }
 // conform order
-exports.confromorder = async (req, res) => {
-    // app.post("/conformorder", async (req, res) => {
+exports.confromorder = async (req, res) => {    
     var updatenode = false;
-    var count = 0;
-    // console.log(req.body);
-    var orderarray = req.body.order;
-    // console.log(orderarray.length)
-    indexschema.orderarray.forEach(async (i) => {
+    var count = 0;    
+    var orderarray = req.body.order;    
+    orderarray.forEach(async (i) => {
         count++;
-        // console.log("Count $$$$$$$$$",count)
-        // console.log(await i,await i)
+        console.log("Count $$$$$$$$$",count)
+        console.log(await i,await i)
         await indexschema.orderschema.findOneAndUpdate(
             { "userid": await i.userid, "orderid": await i.orderid, "productid": await i.productid, "orderedon": await i.orderedon, "orderhistory": await i.orderhistory },
             { "orderconform": true }) //updating here

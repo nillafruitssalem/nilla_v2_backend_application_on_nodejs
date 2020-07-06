@@ -85,6 +85,11 @@ app.post("/login", (req, res) => {
                             res.json({ "status": true, "Data": result, "token": d });
                             res.end();
                         }
+                        if (hashcmp == false) {
+                            res.json({ "status": false, "msg": "Incorrect Password" });
+                            res.end();
+                        }
+
                     }).catch(e => {
                         res.json({ "status": false, "Error": e });
                         res.end();
@@ -101,8 +106,8 @@ app.post("/login", (req, res) => {
 
 })
 
-app.put("/resetPassword",(req,res)=>{
-    console.log("reset password",req.body)
+app.put("/resetPassword", (req, res) => {
+    console.log("reset password", req.body)
     const saltRounds = 14;
     res.end("tk");
     // bcrypt.hash(req.body.resetpassword, saltRounds).then(hash => {
