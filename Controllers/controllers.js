@@ -259,15 +259,16 @@ exports.getspecificproduct = async (req, res) => {
 exports.addOrder = async (req, res) => {
     // app.post("/addorder_user/:pid", (req, res) => {
     indexschema.productschema.findOne({ "productid": req.params.pid }).then(result => {
-        console.log("reuslt order", result)
+        // console.log("reuslt order", result)
         if (result.productqty == 0) {
             res.json({ "status": false, "msg": "out of stock please update product quatity" });
             res.end();
             return;
         }
-        else {
+        else {            
             let fd = new Date();
-            let s = fd.getDate() + "-" + (fd.getMonth() + 1) + "-" + fd.getFullYear()
+            let s = fd.getDate().toString().padStart(2, "0") + "-" + (fd.getMonth() + 1).toString().padStart(2, "0") + "-" + fd.getFullYear()            
+            // console.log(s)
             order = new indexschema.orderschema({
                 userid: req.body.userid,
                 orderid: (req.body.userid).substring(0, 6) + Date.now(),
@@ -433,14 +434,14 @@ exports.usercancelorder = async (req, res) => {
     // })
 }
 // conform order
-exports.confromorder = async (req, res) => {    
+exports.confromorder = async (req, res) => {
     var updatenode = false;
-    var count = 0;    
-    var orderarray = req.body.order;    
+    var count = 0;
+    var orderarray = req.body.order;
     orderarray.forEach(async (i) => {
         count++;
-        console.log("Count $$$$$$$$$",count)
-        console.log(await i,await i)
+        console.log("Count $$$$$$$$$", count)
+        console.log(await i, await i)
         await indexschema.orderschema.findOneAndUpdate(
             { "userid": await i.userid, "orderid": await i.orderid, "productid": await i.productid, "orderedon": await i.orderedon, "orderhistory": await i.orderhistory },
             { "orderconform": true }) //updating here
