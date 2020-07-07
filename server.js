@@ -106,28 +106,34 @@ app.post("/login", (req, res) => {
 
 })
 
-app.put("/resetPassword", (req, res) => {
-    console.log("reset password", req.body)
-    const saltRounds = 14;
-    res.end("tk");
-    // bcrypt.hash(req.body.resetpassword, saltRounds).then(hash => {
-    //     indexschema.userschema.findOneAndUpdate(
-    //         { "emailid": req.body.emailid },
-    //         {
-    //             "password": hash
-    //         }).then(result => {
-    //             res.json({ "status": true, "msg": "Record Updated Success" });
-    //             res.end();
-    //         }).catch(e => {
-    //             console.log(e)
-    //             res.json({ "status": false, "msg": "Record Updated UnSuccess", "Error": e });
-    //             res.end();
-    //         })
-    // }).catch(e => {
-    //     console.log(e)
-    //     res.json({ "status": false, "msg": "Record Updated UnSuccess", "Error": e });
-    //     res.end();
-    // })
+app.put("/resetpassword", (req, res) => {
+    // console.log("reset password", req.body)
+    const saltRounds = 14;    
+    bcrypt.hash(req.body.resetpassword, saltRounds).then(hash => {
+        indexschema.userschema.findOneAndUpdate(
+            { "emailid": req.body.emailid ,"phonenumber":req.body.phonenumber },
+            {
+                "password": hash
+            }).then(result => {
+                // console.log(result,"reset pwd")
+                if(result == null){
+                    res.json({ "status": false, "msg": "Record  Not Updated Successfully" });
+                    res.end();
+                }
+                else {
+                    res.json({ "status": true, "msg": "Record Updated Success" });
+                    res.end();
+                }
+            }).catch(e => {
+                console.log(e)
+                res.json({ "status": false, "msg": "Record Updated UnSuccess", "Error": e });
+                res.end();
+            })
+    }).catch(e => {
+        console.log(e)
+        res.json({ "status": false, "msg": "Record Updated UnSuccess", "Error": e });
+        res.end();
+    })
 })
 // jwt auth
 app.use((req, res, next) => {
