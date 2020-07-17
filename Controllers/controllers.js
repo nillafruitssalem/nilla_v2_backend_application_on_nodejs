@@ -4,7 +4,9 @@ const indexschema = require("../Schema")
 const upload = require('../Config/multerconfig');
 const bcrypt = require('bcrypt');
 const cloudinary = require('cloudinary').v2;
-
+const aes256 = require('aes256');
+// const Cryptr = require('cryptr');
+// const cryptr = new Cryptr('aes-256');
 // exports.initial = async (req, res) => {
 //     res.json("Connected");
 //     res.end();
@@ -99,6 +101,17 @@ const cloudinary = require('cloudinary').v2;
 exports.findspecificuser = async (req, res) => {
     // app.get("/allusers/:userid", (req, res) => {
     indexschema.userschema.findOne({ userid: req.params.userid }).then(result => {
+        
+                            // let en = cryptr.encrypt("ram");
+        // console.log(en);
+        
+        // let dc = cryptr.decrypt(en);
+        // console.log(dc)
+        
+        // res.json(dc);
+        
+        
+
         res.json({ "status": true, "Data": result });
         res.end();
     }).catch(e => {

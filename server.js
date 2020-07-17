@@ -9,6 +9,10 @@ const path = require("path");
 const MongoClient = require("mongodb").MongoClient;
 const mongoose = require("mongoose");
 const indexschema = require("./Schema")
+const aes256 = require('aes256');
+// const Cryptr = require('cryptr');
+// const aes256 = new Cryptr('aes-256');
+
 
 var app = express();
 app.use(bodyparser.json({ limit: '50mb' }));
@@ -21,7 +25,6 @@ app.use(function (req, res, next) {
 });
 app.set('setsecret', process.env.SECRETECODE);
 
-// connection/intiate status
 app.get("/", (req, res) => {
     res.json("Connected");
     res.end();
@@ -29,7 +32,7 @@ app.get("/", (req, res) => {
 //  show all products with out jwt token
 app.get("/allproduct_withoutauth", (req, res) => {
     indexschema.productschema.find({}).then(result => {
-        res.json({ "status": true, "Data": result });
+        res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "Data": result })));
         res.end();
     }).catch(e => {
         console.log(e)
@@ -38,11 +41,16 @@ app.get("/allproduct_withoutauth", (req, res) => {
     })
 });
 
+app.post("/decrypt", (req, res) => {    
+    res.json(JSON.parse(aes256.decrypt(process.env.ENKEY,req.body.Data)));
+    res.end();
+})
+
 // register user
 app.post("/reguser", (req, res) => {
+    req.body = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
     const saltRounds = 14;
     bcrypt.hash(req.body.password, saltRounds).then(hash => {
-
         user = new indexschema.userschema({
             userid: (req.body.username).substring(0, 3) + Date.now(),
             username: req.body.username,
@@ -68,6 +76,7 @@ app.post("/reguser", (req, res) => {
 })
 // login
 app.post("/login", (req, res) => {
+    req.body = cryptr.decrypt(req.body);
     jwt.sign({ exp: Math.floor(Date.now() / 1000) + (60 * 60), data: req.body.emailid }, app.get('setsecret'), (e, d) => {
         // jwt.sign(req.body.name,app.get('setsecret'),{expiresIn: Math.floor(Date.now() / 1000) + (60 * 1) },(e,d)=>{   
         if (e) {
@@ -82,7 +91,7 @@ app.post("/login", (req, res) => {
                 } else {
                     bcrypt.compare(req.body.password, result["password"]).then(hashcmp => {
                         if (hashcmp == true) {
-                            res.json({ "status": true, "Data": result, "token": d });
+                            res.json({ "status": true, "Data": cryptr.encrypt(result), "token": d });
                             res.end();
                         }
                         if (hashcmp == false) {
@@ -107,16 +116,16 @@ app.post("/login", (req, res) => {
 })
 
 app.put("/resetpassword", (req, res) => {
-    // console.log("reset password", req.body)
-    const saltRounds = 14;    
+    req.body = cryptr.decrypt(req.body);
+    const saltRounds = 14;
     bcrypt.hash(req.body.resetpassword, saltRounds).then(hash => {
         indexschema.userschema.findOneAndUpdate(
-            { "emailid": req.body.emailid ,"phonenumber":req.body.phonenumber },
+            { "emailid": req.body.emailid, "phonenumber": req.body.phonenumber },
             {
                 "password": hash
             }).then(result => {
                 // console.log(result,"reset pwd")
-                if(result == null){
+                if (result == null) {
                     res.json({ "status": false, "msg": "Record  Not Updated Successfully" });
                     res.end();
                 }
@@ -183,3 +192,5 @@ app.listen(port, (err) => {
     return err;
 
 })
+
+
