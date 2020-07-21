@@ -97,22 +97,12 @@ const aes256 = require('aes256');
 
 // }
 
-// find specific user
+// find specific user en done
 exports.findspecificuser = async (req, res) => {
-    // app.get("/allusers/:userid", (req, res) => {
+    req.params = JSON.parse(aes256.decrypt(process.env.ENKEY, req.params.userid));
     indexschema.userschema.findOne({ userid: req.params.userid }).then(result => {
-        
-                            // let en = cryptr.encrypt("ram");
-        // console.log(en);
-        
-        // let dc = cryptr.decrypt(en);
-        // console.log(dc)
-        
-        // res.json(dc);
-        
-        
-
-        res.json({ "status": true, "Data": result });
+        res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "Data": result })));
+        // res.json({ "status": true, "Data": result });        
         res.end();
     }).catch(e => {
         console.log(e)
@@ -120,11 +110,11 @@ exports.findspecificuser = async (req, res) => {
         res.end();
     })
 }
-// show all users
+// show all users en done
 exports.allusers = async (req, res) => {
     // app.get("/allusers", (req, res) => {
     indexschema.userschema.find({}).then(result => {
-        res.json({ "status": true, "Data": result });
+        res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "Data": result })));
         res.end();
     }).catch(e => {
         console.log(e)
@@ -132,11 +122,11 @@ exports.allusers = async (req, res) => {
         res.end();
     })
 }
-//  show all products
+//  show all products en done
 exports.allproducts = async (req, res) => {
     // app.get("/allproduct", (req, res) => {
     indexschema.productschema.find({}).then(result => {
-        res.json({ "status": true, "Data": result });
+        res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "Data": result })));
         res.end();
     }).catch(e => {
         console.log(e)
@@ -278,9 +268,9 @@ exports.addOrder = async (req, res) => {
             res.end();
             return;
         }
-        else {            
+        else {
             let fd = new Date();
-            let s = fd.getDate().toString().padStart(2, "0") + "-" + (fd.getMonth() + 1).toString().padStart(2, "0") + "-" + fd.getFullYear()            
+            let s = fd.getDate().toString().padStart(2, "0") + "-" + (fd.getMonth() + 1).toString().padStart(2, "0") + "-" + fd.getFullYear()
             // console.log(s)
             order = new indexschema.orderschema({
                 userid: req.body.userid,

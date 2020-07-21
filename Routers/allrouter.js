@@ -17,10 +17,10 @@ module.exports = (app) => {
     // reset password
     // app.put("/resetPassword",controllers.resetPassword);
 
-    // find specific user
+    // find specific user en done
     app.get('/allusers/:userid', controllers.findspecificuser);
 
-    // show all users
+    // show all users en done
     app.get('/allusers', controllers.allusers);
 
     //  show all products

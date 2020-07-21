@@ -41,8 +41,8 @@ app.get("/allproduct_withoutauth", (req, res) => {
     })
 });
 
-app.post("/decrypt", (req, res) => {    
-    res.json(JSON.parse(aes256.decrypt(process.env.ENKEY,req.body.Data)));
+app.post("/decrypt", (req, res) => {
+    res.json(JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.Data)));
     res.end();
 })
 
@@ -76,7 +76,7 @@ app.post("/reguser", (req, res) => {
 })
 // login
 app.post("/login", (req, res) => {
-    req.body = cryptr.decrypt(req.body);
+    req.body = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
     jwt.sign({ exp: Math.floor(Date.now() / 1000) + (60 * 60), data: req.body.emailid }, app.get('setsecret'), (e, d) => {
         // jwt.sign(req.body.name,app.get('setsecret'),{expiresIn: Math.floor(Date.now() / 1000) + (60 * 1) },(e,d)=>{   
         if (e) {
@@ -91,7 +91,7 @@ app.post("/login", (req, res) => {
                 } else {
                     bcrypt.compare(req.body.password, result["password"]).then(hashcmp => {
                         if (hashcmp == true) {
-                            res.json({ "status": true, "Data": cryptr.encrypt(result), "token": d });
+                            res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "Data": result, "token": d })));
                             res.end();
                         }
                         if (hashcmp == false) {
@@ -114,9 +114,9 @@ app.post("/login", (req, res) => {
     })
 
 })
-
-app.put("/resetpassword", (req, res) => {
-    req.body = cryptr.decrypt(req.body);
+// en done
+app.put("/resetpassword", (req, res) => {    
+    req.body = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
     const saltRounds = 14;
     bcrypt.hash(req.body.resetpassword, saltRounds).then(hash => {
         indexschema.userschema.findOneAndUpdate(
