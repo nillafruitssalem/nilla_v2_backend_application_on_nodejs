@@ -1,12 +1,15 @@
-
 var mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 var orderschema = new mongoose.Schema({
     userid: {
         type: String,
         required: true
     },
-
+    postedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'        
+    },
     orderid: {
         type: String,
         required: true
