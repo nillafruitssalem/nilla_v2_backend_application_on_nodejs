@@ -24,23 +24,18 @@ exports.allproducts = async (req, res) => {
         return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": false, "Error": e })));                
     })
 }
-//  add Product
-exports.addProduct = async (req, res) => {
-    req.body = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
-    req.file = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
+//  add Product en_complete
+exports.addProduct = async (req, res) => {    
     let myarray = [];
-    myarray.push(JSON.parse(req.body.pdata));
-    if (!req.file) {
-        res.status(500);
-        res.json('file not found');
-        res.end();
-        return;
+    myarray.push(JSON.parse(req.body.pdata));    
+    if (!req.file) {        
+        console.log("filenot found")
+        return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify('file not found')));                        
     }
     cloudinary.uploader.upload(req.file.path, (err, data) => {
         if (err) {
-            console.log("err on cloudinary", err)
-            res.end();
-            return;
+            console.log("pupload",err)
+             res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({Error:err})));                                    
         }
         if (data) {
             prod = new indexschema.productschema({
@@ -53,20 +48,22 @@ exports.addProduct = async (req, res) => {
                 productimgdet: data
             })
             prod.save().then(result => {
-                res.json({ "status": true, "msg": "Record Insertion Success" });
-                res.end();
+                console.log("saved")
+                return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "msg": "Record Insertion Success" })));                        
             }).catch(e => {
                 console.log(e)
-                res.json({ "status": false, "msg": "Record Insertion UnSuccess", "Error": e });
-                res.end();
-                return;
+                return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": false, "msg": "Record Insertion UnSuccess", "Error": e })));                                        
             })
         }
     })
 }
-// update Product
+// update Product en_complete
 exports.updateProduct = async (req, res) => {
     // app.put("/updateproduct/:pid", upload.single('file'), (req, res) => {
+        req.body = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
+        req.file = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
+        console.log(JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data)),"update")
+
     let myarray = [];
     myarray.push(JSON.parse(req.body.pdata));
     console.log("updateproduct", JSON.parse(req.body.pdata))
@@ -79,19 +76,17 @@ exports.updateProduct = async (req, res) => {
                 "productqty": myarray[0].productqty,
                 "productunits": myarray[0].productunits
             }).then(result => {
-                res.json({ "status": true, "msg": "Record Updated Success" });
-                res.end();
+                return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "msg": "Record Updated Success" })));                        
             }).catch(e => {
                 console.log(e)
-                res.json({ "status": false, "msg": "Record Updated UnSuccess", "Error": e });
-                res.end();
+                return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": false, "msg": "Record Updated UnSuccess", "Error": e })));        
+                
             })
     }
     if (req.file) {
         cloudinary.uploader.upload(req.file.path, (err, data) => {
             if (err) {
-                res.json({ "status": false, "msg": "Error on Cloudinary" });
-                res.end();
+                return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": false, "msg": "Error on Cloudinary" })));                        
             }
             if (data) {
                 indexschema.productschema.findOneAndUpdate(
@@ -104,18 +99,16 @@ exports.updateProduct = async (req, res) => {
                         "productimage": data["secure_url"],
                         "productimgdet": data
                     }).then(result => {
-                        res.json({ "status": true, "msg": "Record Updated Success" });
-                        res.end();
+                        return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "msg": "Record Updated Success" })));                                                
                     }).catch(e => {
                         console.log(e)
-                        res.json({ "status": false, "msg": "Record Updated UnSuccess", "Error": e });
-                        res.end();
+                        return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": false, "msg": "Record Updated UnSuccess", "Error": e })));                                                                        
                     })
             }
         })
     }
 }
-// delete Product
+// delete Product en_complete
 exports.deleteproduct = async (req, res) => {    
     indexschema.productschema.findOneAndDelete(
         { "productid": req.params.pid }).then(result => {
@@ -129,7 +122,7 @@ exports.deleteproduct = async (req, res) => {
         })
 }
 // specific Product en_complete
-exports.getspecificproduct = async (req, res) => {
+exports.getspecificproduct = async (req, res) => {    
     indexschema.productschema.findOne({ "productid": req.params.pid })
         .then(result => {
             if (result == null) {
