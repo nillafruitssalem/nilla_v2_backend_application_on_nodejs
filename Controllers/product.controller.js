@@ -48,7 +48,7 @@ exports.addProduct = async (req, res) => {
                 productimgdet: data
             })
             prod.save().then(result => {
-                console.log("saved")
+                // console.log("saved")
                 return res.json(aes256.encrypt(process.env.ENKEY, JSON.stringify({ "status": true, "msg": "Record Insertion Success" })));                        
             }).catch(e => {
                 console.log(e)
@@ -58,15 +58,11 @@ exports.addProduct = async (req, res) => {
     })
 }
 // update Product en_complete
-exports.updateProduct = async (req, res) => {
-    // app.put("/updateproduct/:pid", upload.single('file'), (req, res) => {
-        req.body = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
-        req.file = JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data));
-        console.log(JSON.parse(aes256.decrypt(process.env.ENKEY, req.body.data)),"update")
+exports.updateProduct = async (req, res) => {   
 
     let myarray = [];
     myarray.push(JSON.parse(req.body.pdata));
-    console.log("updateproduct", JSON.parse(req.body.pdata))
+    // console.log("updateproduct", JSON.parse(req.body.pdata))
     if (!req.file) {
         indexschema.productschema.findOneAndUpdate(
             { "productid": req.params.pid },
